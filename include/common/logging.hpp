@@ -9,7 +9,7 @@ namespace COMMON {
 
 #define CLASS_MAKE_LOGGER \
     private:\
-            Logger _logger;
+            COMMON::Logger _logger;
 #define CLASS_INIT_LOGGER(classname, level)\
     _logger.setClassName(classname);\
     _logger.setLevel(level);
