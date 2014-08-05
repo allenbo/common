@@ -2,6 +2,7 @@
 #define __COMMON_LOGGING_HPP__
 
 #include <stdarg.h>
+#include <stdlib.h>
 #include <string>
 
 namespace COMMON {
@@ -19,7 +20,7 @@ namespace COMMON {
 #define CLOG_FATAL(...) _logger.fatal(  __func__,__FILE__, __LINE__, __VA_ARGS__)
 
 
-#define FUNC_MAKE_LOGGER GDRIVE::Logger __func_logger__;
+#define FUNC_MAKE_LOGGER COMMON::Logger __func_logger__;
 #define FUNC_LOGGER_SET_LEVEL(level) __func_logger__.setLevel(level);
 #define FLOG_DEBUG(...) __func_logger__.debug( __func__, __FILE__, __LINE__, __VA_ARGS__)
 #define FLOG_INFO(...) __func_logger__.info( __func__, __FILE__, __LINE__, __VA_ARGS__)
@@ -106,9 +107,9 @@ class Logger {
             char fullfmt[512];
             const char* basename = baseFilename(filename);
             if (_type == LT_FUNCTION) {
-                snprintf(fullfmt, 511, "%s %s @ [%s|%d] %s", level_literal[level], funcname, basename, line, fmt);
+                snprintf(fullfmt, 511, "%s %s @ [%s|%d] %s", level_literal[level], funcname, basename, lineno, fmt);
             } else {
-                snprintf(fullfmt, 511, "%s %s:%s @ [%s|%d] %s", level_literal[level], _cname.c_str(), funcname, basename, line, fmt);
+                snprintf(fullfmt, 511, "%s %s:%s @ [%s|%d] %s", level_literal[level], _cname.c_str(), funcname, basename, lineno, fmt);
             }
             vfprintf(stderr, fullfmt, va);
 
