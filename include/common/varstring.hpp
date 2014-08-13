@@ -50,7 +50,7 @@ class VarString {
 
         static std::vector<std::string> split(const std::string str, const std::string delim) {
             std::vector<std::string> rst;
-            int pos = 0;
+            size_t pos = 0;
             while(true) {
                 size_t next = str.find(delim, pos);
                 if (next != std::string::npos) {
@@ -70,7 +70,7 @@ class VarString {
 
 
         static std::string lstrip(const std::string str) {
-            int pos = 0; 
+            size_t pos = 0;
             while(pos < str.size() && std::isspace(str[pos])) pos ++;
             return std::string(str, pos, str.size() - pos);
         }
