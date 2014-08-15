@@ -8,10 +8,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-#define CLASS_NOCOPY(class) \
-    private: \
-        class& operator=(class& other); \
-        class(const class& other);
 
 namespace COMMON {
 

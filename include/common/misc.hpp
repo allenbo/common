@@ -12,6 +12,11 @@
 
 namespace COMMON {
 
+#define CLASS_NOCOPY(class) \
+    private: \
+        class& operator=(class& other); \
+        class(const class& other);
+
 static size_t get_ncpu() {
 #ifdef WIN32
     SYSTEM_INFO sysinfo;
