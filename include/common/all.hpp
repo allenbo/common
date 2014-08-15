@@ -3,5 +3,7 @@
 
 #include "common/logging.hpp"
 #include "common/varstring.hpp"
+#include "common/threadpool.hpp"
+#include "common/misc.hpp"
 
 #endif

@@ -6,8 +6,8 @@ TESTBIN_DIR := test_bin
 CPP := g++
 CC := gcc
 
-CFLAG := -O2
-LFLAG := -O2 -flto
+CFLAG := -g
+LFLAG := -g -flto -lpthread
 
 TEST_SRC := $(wildcard $(TEST_SRC_DIR)/*.cpp)
 TEST_TARGET := $(patsubst %.cpp, %, $(subst $(TEST_SRC_DIR),$(TESTBIN_DIR), $(TEST_SRC)))
