@@ -4,6 +4,7 @@
 #include "common/logging.hpp"
 #include "common/varstring.hpp"
 #include "common/threadpool.hpp"
+#include "common/threading.hpp"
 #include "common/queue.hpp"
 #include "common/timer.hpp"
 #include "common/misc.hpp"
