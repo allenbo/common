@@ -2,6 +2,7 @@
 #define __COMMON_QUEUE_HPP__
 
 #include "common/misc.hpp"
+#include "common/threading.hpp"
 #include <pthread.h>
 #include <deque>
 #include <stdio.h>
@@ -12,35 +13,28 @@ template<class T>
 class Queue {
     public:
         Queue(size_t size = 0)
-            :_size(size)
+            :_size(size), _lock(), _empty_cond(&_lock), _full_cond(&_lock)
         {
-            pthread_mutex_init(&_lock, NULL);
-            pthread_cond_init(&_empty_cond, NULL);
-            pthread_cond_init(&_full_cond, NULL);
         }
         ~Queue() {
             _queue.clear();
-            pthread_mutex_destroy(&_lock);
-            pthread_cond_destroy(&_empty_cond);
-            pthread_cond_destroy(&_full_cond);
         }
 
         void push(const T& item) {
-            pthread_mutex_lock(&_lock);
+            _lock.lock();
             size_t queue_size = _queue.size();
             if (_size != 0 && queue_size == _size) {
-                //fprintf(stderr, "Queue full, wait for consuming\n");
-                pthread_cond_wait(&_full_cond, &_lock);
+                _full_cond.wait();
                 _queue.push_back(item);
             } else {
                 _queue.push_back(item);
-                pthread_cond_signal(&_empty_cond);
+                _empty_cond.notify();
             }
-            pthread_mutex_unlock(&_lock);
+            _lock.unlock();
         }
 
         bool try_pop(T* item) {
-            pthread_mutex_lock(&_lock);
+            _lock.lock();
             size_t queue_size = _queue.size();
             bool rst = false;
             if (queue_size != 0) {
@@ -48,32 +42,32 @@ class Queue {
                 _queue.pop_front();
                 rst = true;
                 if (queue_size == _size - 1) {
-                    pthread_cond_signal(&_full_cond);
+                    _full_cond.notify();
                 }
             }
-            pthread_mutex_unlock(&_lock);
+            _lock.unlock();
             return rst;
         }
         
         T pop() {
-            pthread_mutex_lock(&_lock);
+            _lock.lock();
             while(_queue.empty()) {
-                pthread_cond_wait(&_empty_cond, &_lock);
+                _empty_cond.wait();
             }
 
             T item = _queue.front();
             _queue.pop_front();
             if (_queue.size() == _size - 1) {
-                pthread_cond_signal(&_full_cond);
+                _full_cond.notify();
             }
-            pthread_mutex_unlock(&_lock);
+            _lock.unlock();
             return item;
         }
 
         size_t size() {
-            pthread_mutex_lock(&_lock);
+            _lock.lock();
             size_t size = _queue.size();
-            pthread_mutex_unlock(&_lock);
+            _lock.unlock();
             return size;
         }
 
@@ -82,9 +76,9 @@ class Queue {
 
     private:
         std::deque<T> _queue;
-        pthread_mutex_t _lock;
-        pthread_cond_t _empty_cond;
-        pthread_cond_t _full_cond;
+        Mutex _lock;
+        Condition _empty_cond;
+        Condition _full_cond;
         size_t _size;
 };
 
