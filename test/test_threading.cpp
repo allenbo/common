@@ -7,7 +7,6 @@ using namespace COMMON;
 class MyThread: public Thread {
     public:
         void run() {
-            sleep(1);
             printf("In mythread\n");
         }
 };
@@ -17,5 +16,8 @@ int main() {
     for (int i = 0; i < 10; i ++ ) {
         thread[i].start();
     }
-}
 
+    for (int i = 0; i < 10; i ++) {
+        thread[i].join();
+    }
+}

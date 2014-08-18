@@ -7,6 +7,45 @@
 
 namespace COMMON {
 
+class Lock {
+    public:
+        virtual void lock() = 0;
+        virtual void unlock() = 0;
+        virtual ~Lock() {}
+};
+
+class Mutex : public Lock {
+    public:
+        Mutex() {
+            pthread_mutex_init(&_lock, NULL);
+        }
+        ~Mutex() {
+            pthread_mutex_destroy(&_lock);
+        }
+        void lock() {
+            pthread_mutex_lock(&_lock);
+        }
+        void unlock() {
+            pthread_mutex_unlock(&_lock);
+        }
+    private:
+        pthread_mutex_t _lock;
+};
+
+class ScopeLock {
+    public:
+        ScopeLock() {
+            _lock = new Mutex();
+            _lock->lock();
+        }
+        ~ScopeLock() {
+            _lock->unlock();
+            delete _lock;
+        }
+    private:
+        Lock* _lock;
+};
+
 class Runable {
     public:
         virtual void run() = 0;
@@ -16,9 +55,11 @@ class Thread: public Runable {
     public:
         Thread(const Runable& runable) {
             _context = &runable;
+            _lock = new Mutex();
         }
         Thread() {
             _context = NULL;
+            _lock = new Mutex();
         }
 
         virtual void run() {
@@ -26,27 +67,28 @@ class Thread: public Runable {
         }
 
         void start() {
+            if (_active == true) {
+                return;
+            }
+            _active = true;
             if (_context == NULL) {
                 _context = this;
             }
             pthread_create(&_thread_id, NULL, &Thread::_run_thread, (void*)_context);
-            struct timespec ts;
-            ts.tv_sec = 0;
-            ts.tv_nsec = 1000; // 1us
-            nanosleep(&ts, NULL);
-            /*
-            pthread_join(_thread_id, NULL);
-            pthread_detach(_thread_id);
-            */
-
         }
 
         void join() {
             pthread_join(_thread_id, NULL);
+            _active = false;
+        }
+
+        bool is_active() {
+            return _active;
         }
 
         virtual ~Thread() {
             join();
+            delete _lock;
         }
 
     private:
@@ -59,6 +101,9 @@ class Thread: public Runable {
 
         pthread_t _thread_id;
         const Runable * _context;
+
+        bool _active;
+        Lock* _lock;
 };
 
 }
