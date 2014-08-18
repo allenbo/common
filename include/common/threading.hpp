@@ -4,17 +4,21 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <time.h>
+#include "common/misc.hpp"
 
 namespace COMMON {
 
 class Lock {
+    CLASS_NOCOPY(Lock)
     public:
+        Lock(){}
         virtual void lock() = 0;
         virtual void unlock() = 0;
         virtual ~Lock() {}
 };
 
 class Mutex : public Lock {
+    CLASS_NOCOPY(Mutex)
     public:
         Mutex() {
             pthread_mutex_init(&_lock, NULL);
@@ -30,6 +34,7 @@ class Mutex : public Lock {
         }
     private:
         pthread_mutex_t _lock;
+        friend class Condition;
 };
 
 class ScopeLock {
@@ -44,6 +49,33 @@ class ScopeLock {
         }
     private:
         Lock* _lock;
+};
+
+class Condition {
+    CLASS_NOCOPY(Condition)
+    public:
+        Condition(Mutex* lock) {
+            _lock = lock;
+            pthread_cond_init(&_cond, NULL);
+        }
+        ~Condition(){
+            pthread_cond_destroy(&_cond);
+        }
+
+        void wait() {
+            pthread_cond_wait(&_cond, &_lock->_lock); 
+        }
+
+        void notify() {
+            pthread_cond_signal(&_cond);
+        }
+
+        void notify_all() {
+            pthread_cond_broadcast(&_cond);
+        }
+    private:
+        pthread_cond_t _cond;
+        Mutex* _lock;
 };
 
 class Runable {
