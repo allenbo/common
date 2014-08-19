@@ -29,6 +29,42 @@ namespace COMMON {
 
 class VarString {
     public:
+        static std::string tolower(const std::string str) {
+            size_t size = str.size();
+            const char* p_str = str.c_str();
+            char* rst = NULL;
+            MALLOC(char, rst, size);
+            for(size_t i = 0; i < size; i ++ ) {
+                if (p_str[i] <= 'Z' && p_str[i] >= 'A') {
+                    rst[i] = p_str[i] + 32;
+                }
+                else {
+                    rst[i] = p_str[i];
+                }
+            }
+            std::string str_rst(rst, size);
+            free(rst);
+            return str_rst;
+        }
+
+        static std::string toupper(const std::string str) {
+            size_t size = str.size();
+            const char* p_str = str.c_str();
+            char* rst = NULL;
+            MALLOC(char, rst, size);
+            for(size_t i = 0; i < size; i ++ ) {
+                if (p_str[i] <= 'z' && p_str[i] >= 'a') {
+                    rst[i] = p_str[i] - 32;
+                }
+                else {
+                    rst[i] = p_str[i];
+                }
+            }
+            std::string str_rst(rst, size);
+            free(rst);
+            return str_rst;
+        }
+        
         static std::string itos(int i) {
             char tmp[20];
             sprintf(tmp, "%d", i);

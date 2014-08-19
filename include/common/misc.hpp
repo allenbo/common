@@ -14,7 +14,11 @@
 #include <ctime>
 #endif
 
+#include <map>
+
 namespace COMMON {
+
+typedef std::map<std::string, std::string> string_map;
 
 #define CLASS_NOCOPY(class) \
     private: \

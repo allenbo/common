@@ -7,6 +7,7 @@
 #include "common/threading.hpp"
 #include "common/queue.hpp"
 #include "common/timer.hpp"
+#include "common/property.hpp"
 #include "common/misc.hpp"
 
 #endif
