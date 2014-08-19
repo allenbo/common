@@ -54,7 +54,7 @@ class Property {
             }
         }
 
-        bool get_real(std::string key, bool d = false) {
+        bool get_bool(std::string key, bool d = false) {
             std::string value = get(key);
             if (value == "") {
                 return d;
