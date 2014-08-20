@@ -104,6 +104,14 @@ class VarString {
             return str.compare(0, prefix.size(), prefix) == 0;
         }
 
+        static bool ends_with(const std::string str, const std::string suffix) {
+            const char* p = str.c_str() + str.size();
+            const char* q = suffix.c_str() + suffix.size();
+            for(size_t i = 0; i < suffix.size(); i ++ ) {
+                if (*(p -i - 1) != *(q -i -1)) return false;
+            }
+            return true;
+        }
 
         static std::string lstrip(const std::string str) {
             size_t pos = 0;
