@@ -19,6 +19,32 @@ class Path {
             return _sep;
         }
 
+#ifndef Win32
+        static inline std::string devnull() {
+            static std::string _devnull = "/dev/null";
+            return _devnull;
+        }
+#endif
+
+        static inline std::string curdir() {
+            static std::string _curdir = ".";
+            return _curdir;
+        }
+
+        static inline std::string parentdir() {
+            static std::string _parentdir = "..";
+            return _parentdir;
+        }
+
+        static inline std::string pathsep() {
+#ifdef Win32
+            static std::string _pathsep = ";";
+#else
+            static std::string _pathsep = ":";
+#endif
+            return _pathsep;
+        }
+
         static std::pair<std::string, std::string> split(const std::string& path) {
             std::string::size_type pos = path.rfind(Path::sep());
             std::string dir = "", base = "";
@@ -27,7 +53,7 @@ class Path {
                 pos ++;
                 base = path.substr(pos);
             } else {
-                base = path.substr(0);
+                base = path;
             }
             return make_pair(dir, base);
         }
@@ -43,6 +69,33 @@ class Path {
                     rst = dir + Path::sep() + base;
                 }
             }
+            return rst;
+        }
+
+        static std::string basename(const std::string& path) {
+            return Path::split(path).first;
+        }
+
+        static std::string dirname(const std::string& path) {
+            return Path::split(path).second;
+        }
+
+        static std::pair<std::string, std::string> splitext(const std::string& path) {
+            std::string::size_type pos = path.rfind(".");
+            std::string name = "", ext = "";
+            if (pos != std::string::npos) {
+                name = path.substr(0, pos);
+                ext = path.substr(pos);
+            } else {
+                name = path;
+            }
+            return make_pair(name, ext);
+        }
+
+        static bool exists(const std::string& path) {
+            std::ifstream  fin(path.c_str());
+            bool rst = fin.good();
+            fin.close();
             return rst;
         }
 };
