@@ -40,7 +40,7 @@ class Mutex : public Lock {
 class ScopeLock {
     public:
         ScopeLock(Mutex* lock) {
-            _lock = lock
+            _lock = lock;
             _lock->lock();
         }
         ~ScopeLock() {

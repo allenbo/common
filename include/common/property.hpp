@@ -14,7 +14,7 @@ namespace COMMON {
 class Property {
     public:
         Property(std::string filename)
-            :_in(* new std::ifstream(filename)), _own(true)
+            :_in(* new std::ifstream(filename.c_str())), _own(true)
         {
         }
         Property(std::istream& in)
