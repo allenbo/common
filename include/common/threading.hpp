@@ -39,13 +39,12 @@ class Mutex : public Lock {
 
 class ScopeLock {
     public:
-        ScopeLock() {
-            _lock = new Mutex();
+        ScopeLock(Mutex* lock) {
+            _lock = lock
             _lock->lock();
         }
         ~ScopeLock() {
             _lock->unlock();
-            delete _lock;
         }
     private:
         Lock* _lock;
@@ -86,10 +85,12 @@ class Runable {
 class Thread: public Runable {
     public:
         Thread(const Runable& runable) {
+            _active = false;
             _context = &runable;
             _lock = new Mutex();
         }
         Thread() {
+            _active = false;
             _context = NULL;
             _lock = new Mutex();
         }
