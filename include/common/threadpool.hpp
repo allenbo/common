@@ -17,6 +17,12 @@ struct ThreadFunc {
     void* args;
 };
 
+class Job {
+    public:
+        virtual void run() = 0;
+        virtual ~Job() {}
+};
+
 #define TP_IMMEDIATE_SHUTDOWN 0
 #define TP_POSTPONED_SHUTDOWN 1
 
@@ -64,14 +70,177 @@ class ThreadPool {
             _stop = true;
         }
 
-        bool add(func function, void* args) {
-            if (_stop == true) return false;
-            ThreadFunc tf;
-            tf.function = function;
-            tf.args = args;
-            _task_queue.push(tf);
+        bool add(void (*fn) (void) ) {
+            typedef void (*FUNC) (void);
+            class VVJob : public Job {
+                public:
+                    VVJob(FUNC fn) : _fn(fn) {
+                    }
+                    void run() {
+                        _fn();
+                    }
+                private:
+                    FUNC _fn;
+            };
+            _task_queue.push(new VVJob(fn));
             return true;
         }
+
+        template<class R>
+        bool add(R (*fn)(void), R* r) {
+            typedef R (*FUNC) (void);
+
+            class RVJob : public Job {
+                public:
+                    RVJob(FUNC fn, R* r) : _fn(fn), _r(r){
+                    }
+                    void run() {
+                        *_r = _fn();
+                    }
+                private:
+                    FUNC _fn;
+                    R* _r;
+            };
+
+            _task_queue.push(new  RVJob(fn, r));
+            return true;
+        }
+
+        template<class A1>
+        bool add(void (*fn) (A1) , A1 a1) {
+            typedef void (*FUNC) (A1);
+
+            class VA1Job : public Job {
+                public:
+                    VA1Job(FUNC fn, A1 a1) : _fn(fn), _a1(a1){
+                    }
+                    void run() {
+                        _fn(_a1);
+                    }
+                private:
+                    FUNC _fn;
+                    A1 _a1;
+            };
+
+            _task_queue.push(new  VA1Job(fn, a1));
+            return true;
+        }
+
+        template<class A1, class R>
+        bool add(R (*fn) (A1), A1 a1, R*r) {
+            typedef R (*FUNC) (A1);
+
+            class RA1Job : public Job {
+                public:
+                    RA1Job(FUNC fn, A1 a1, R* r) : _fn(fn), _a1(a1), _r(r) {
+                    }
+
+                    void run() {
+                        *_r = _fn(_a1);
+                    }
+
+                private:
+                    FUNC _fn;
+                    A1 _a1;
+                    R* _r;
+            };
+
+            _task_queue.push(new RA1Job(fn, a1, r));
+            return true;
+        }
+
+        template<class A1, class A2>
+        bool add(void (*fn) (A1, A2) , A1 a1, A2 a2) {
+            typedef void (*FUNC) (A1, A2);
+
+            class VA2Job : public Job {
+                public:
+                    VA2Job(FUNC fn, A1 a1, A2 a2) : _fn(fn), _a1(a1), _a2(a2) {
+                    }
+                    void run() {
+                        _fn(_a1, _a2);
+                    }
+                private:
+                    FUNC _fn;
+                    A1 _a1;
+                    A2 _a2;
+            };
+
+            _task_queue.push(new  VA2Job(fn, a1, a2));
+            return true;
+        }
+
+        template<class A1, class A2, class R>
+        bool add(R (*fn) (A1, A2), A1 a1, A2 a2, R*r) {
+            typedef R (*FUNC) (A1, A2);
+
+            class RA2Job : public Job {
+                public:
+                    RA2Job(FUNC fn, A1 a1, A2 a2, R* r) : _fn(fn), _a1(a1), _a2(a2), _r(r) {
+                    }
+
+                    void run() {
+                        *_r = _fn(_a1, _a2);
+                    }
+
+                private:
+                    FUNC _fn;
+                    A1 _a1;
+                    A2 _a2;
+                    R* _r;
+            };
+
+            _task_queue.push(new RA2Job(fn, a1, a2, r));
+            return true;
+        }
+
+        template<class A1, class A2, class A3>
+        bool add(void (*fn) (A1, A2, A3) , A1 a1, A2 a2, A3 a3) {
+            typedef void (*FUNC) (A1, A2, A3);
+
+            class VA3Job : public Job {
+                public:
+                    VA3Job(FUNC fn, A1 a1, A2 a2, A3 a3) : _fn(fn), _a1(a1), _a2(a2), _a3(a3){
+                    }
+                    void run() {
+                        _fn(_a1, _a2, _a3);
+                    }
+                private:
+                    FUNC _fn;
+                    A1 _a1;
+                    A2 _a2;
+                    A3 _a3;
+            };
+
+            _task_queue.push(new  VA3Job(fn, a1, a2, a3));
+            return true;
+        }
+
+        template<class A1, class A2, class A3, class R>
+        bool add(R (*fn) (A1, A2, A3), A1 a1, A2 a2, A3 a3, R*r) {
+            typedef R (*FUNC) (A1, A2, A3);
+
+            class RA3Job : public Job {
+                public:
+                    RA3Job(FUNC fn, A1 a1, A2 a2, A3 a3, R* r) : _fn(fn), _a1(a1), _a2(a2), _a3(a3), _r(r) {
+                    }
+
+                    void run() {
+                        *_r = _fn(_a1, _a2, _a3);
+                    }
+
+                private:
+                    FUNC _fn;
+                    A1 _a1;
+                    A2 _a2;
+                    A3 _a3;
+                    R* _r;
+            };
+
+            _task_queue.push(new RA3Job(fn, a1, a2, a3, r));
+            return true;
+        }
+        
 
         ~ThreadPool() {
             if (!_stop) {
@@ -79,7 +248,7 @@ class ThreadPool {
             }
         }
     private:
-        Queue<ThreadFunc> _task_queue;
+        Queue<Job*> _task_queue;
         pthread_mutex_t _lock;
         pthread_t* _pool;
         int _shutdown;
@@ -98,9 +267,9 @@ class ThreadPool {
                     break;
                 }
 
-                ThreadFunc job;
+                Job* job = nullptr;
                 if (self->_task_queue.try_pop(&job)) {
-                    job.function(job.args);
+                    job->run();
                 } else {
                     struct timespec ts;
                     ts.tv_sec = 0;
