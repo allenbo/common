@@ -7,15 +7,11 @@
 #include <pthread.h>
 #include <assert.h>
 #include <stdio.h>
+#include <functional>
 
 namespace COMMON {
 
 typedef void (*func) (void*);
-
-struct ThreadFunc {
-    func function;
-    void* args;
-};
 
 class Job {
     public:
@@ -86,6 +82,25 @@ class ThreadPool {
             return true;
         }
 
+        template<class C>
+        bool add(void (C::*fn) (void), C* c) {
+            typedef void (C::*FUNC) (void);
+            class VCVJob : public Job {
+                public:
+                    VCVJob(FUNC fn, C* c) : _fn(fn), _c(c) {
+                    }
+                    void run() {
+                        (_c->*_fn)();
+                    }
+                private:
+                    FUNC _fn;
+                    C* _c;
+            };
+            _task_queue.push(new VCVJob(fn, c));
+            return true;
+        }
+
+
         template<class R>
         bool add(R (*fn)(void), R* r) {
             typedef R (*FUNC) (void);
@@ -106,6 +121,28 @@ class ThreadPool {
             return true;
         }
 
+        template<class C, class R>
+        bool add(R (C::*fn)(void), C* c, R* r) {
+            typedef R (C::*FUNC) (void);
+
+            class RCVJob : public Job {
+                public:
+                    RCVJob(FUNC fn, C* c, R* r) : _fn(fn), _c(c), _r(r){
+                    }
+                    void run() {
+                        *_r = (_c->*_fn)();
+                    }
+                private:
+                    FUNC _fn;
+                    C* _c;
+                    R* _r;
+            };
+
+            _task_queue.push(new  RCVJob(fn, c, r));
+            return true;
+        }
+
+
         template<class A1>
         bool add(void (*fn) (A1) , A1 a1) {
             typedef void (*FUNC) (A1);
@@ -123,6 +160,27 @@ class ThreadPool {
             };
 
             _task_queue.push(new  VA1Job(fn, a1));
+            return true;
+        }
+
+        template<class C, class A1>
+        bool add(void (C::*fn) (A1) , C* c, A1 a1) {
+            typedef void (C::*FUNC) (A1);
+
+            class VCA1Job : public Job {
+                public:
+                    VCA1Job(FUNC fn, C* c, A1 a1) : _fn(fn), _c(c), _a1(a1){
+                    }
+                    void run() {
+                        (_c->*_fn)(_a1);
+                    }
+                private:
+                    FUNC _fn;
+                    C* _c;
+                    A1 _a1;
+            };
+
+            _task_queue.push(new  VCA1Job(fn, c, a1));
             return true;
         }
 
@@ -149,6 +207,30 @@ class ThreadPool {
             return true;
         }
 
+        template<class C, class A1, class R>
+        bool add(R (C::*fn) (A1), C* c, A1 a1, R*r) {
+            typedef R (C::*FUNC) (A1);
+
+            class RCA1Job : public Job {
+                public:
+                    RCA1Job(FUNC fn, C* c, A1 a1, R* r) : _fn(fn), _c(c), _a1(a1), _r(r) {
+                    }
+
+                    void run() {
+                        *_r = (_c->*_fn)(_a1);
+                    }
+
+                private:
+                    FUNC _fn;
+                    C* _c;
+                    A1 _a1;
+                    R* _r;
+            };
+
+            _task_queue.push(new RCA1Job(fn, c, a1, r));
+            return true;
+        }
+
         template<class A1, class A2>
         bool add(void (*fn) (A1, A2) , A1 a1, A2 a2) {
             typedef void (*FUNC) (A1, A2);
@@ -167,6 +249,28 @@ class ThreadPool {
             };
 
             _task_queue.push(new  VA2Job(fn, a1, a2));
+            return true;
+        }
+
+        template<class C, class A1, class A2>
+        bool add(void (C::*fn) (A1, A2) , C* c, A1 a1, A2 a2) {
+            typedef void (C::*FUNC) (A1, A2);
+
+            class VCA2Job : public Job {
+                public:
+                    VCA2Job(FUNC fn, C* c, A1 a1, A2 a2) : _fn(fn), _c(c), _a1(a1), _a2(a2) {
+                    }
+                    void run() {
+                        (_c->*_fn)(_a1, _a2);
+                    }
+                private:
+                    FUNC _fn;
+                    C* _c;
+                    A1 _a1;
+                    A2 _a2;
+            };
+
+            _task_queue.push(new  VCA2Job(fn, c, a1, a2));
             return true;
         }
 
@@ -193,6 +297,32 @@ class ThreadPool {
             _task_queue.push(new RA2Job(fn, a1, a2, r));
             return true;
         }
+
+        template<class C, class A1, class A2, class R>
+        bool add(R (C::*fn) (A1, A2), C* c, A1 a1, A2 a2, R*r) {
+            typedef R (C::*FUNC) (A1, A2);
+
+            class RCA2Job : public Job {
+                public:
+                    RCA2Job(FUNC fn, C* c, A1 a1, A2 a2, R* r) : _fn(fn), _c(c), _a1(a1), _a2(a2), _r(r) {
+                    }
+
+                    void run() {
+                        *_r = (_c->*_fn)(_a1, _a2);
+                    }
+
+                private:
+                    FUNC _fn;
+                    C* _c;
+                    A1 _a1;
+                    A2 _a2;
+                    R* _r;
+            };
+
+            _task_queue.push(new RCA2Job(fn, c, a1, a2, r));
+            return true;
+        }
+
 
         template<class A1, class A2, class A3>
         bool add(void (*fn) (A1, A2, A3) , A1 a1, A2 a2, A3 a3) {
@@ -270,6 +400,7 @@ class ThreadPool {
                 Job* job = nullptr;
                 if (self->_task_queue.try_pop(&job)) {
                     job->run();
+                    delete job;
                 } else {
                     struct timespec ts;
                     ts.tv_sec = 0;

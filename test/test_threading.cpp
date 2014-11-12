@@ -116,16 +116,130 @@ void test_async_ra3(){
     assert(r == a + b + c);
 }
 
-void test_async() {
-  test_async_vv();
-  test_async_rv();
-  test_async_va1();
-  test_async_ra1();
-  test_async_va2();
-  test_async_ra2();
-  test_async_va3();
-  test_async_ra3();
+void test_async_func() {
+    test_async_vv();
+    test_async_rv();
+    test_async_va1();
+    test_async_ra1();
+    test_async_va2();
+    test_async_ra2();
+    test_async_va3();
+    test_async_ra3();
 }
+
+
+class Tester {
+    public:
+        Tester() {
+            reset();
+        }
+
+        void reset() {
+            _val = 0;
+        }
+
+        void vc() {
+            _val = global_int_value;
+        }
+
+        int rc() {
+            return global_int_value;
+        }
+
+        void vca1(int a){
+            _val = a;
+        }
+
+        int rca1(int a) {
+            return  a;
+        }
+
+        void vca2(int a, int b) {
+            _val += a + b;
+        }
+
+        int rca2(int a, int b) {
+            return _val + a + b;
+        }
+
+        int value() const { return _val;}
+    private:
+        int _val;
+};
+
+void test_async_vc() {
+    Tester test;
+    AsyncMethod async;
+    async.start_async(&Tester::vc, &test);
+    async.wait();
+    assert(test.value() == global_int_value);
+}
+
+void test_async_rc() {
+    Tester test;
+    global_int_value = 10;
+    int r = 0;
+    AsyncMethod async;
+    async.start_async(&Tester::rc, &test, &r);
+    async.wait();
+    assert(r == global_int_value);
+}
+
+void test_async_vca1() {
+    Tester test;
+    int a = 10;
+    AsyncMethod async;
+    async.start_async(&Tester::vca1, &test, a);
+    async.wait();
+    assert(test.value() == a);
+}
+
+void test_async_rca1() {
+    Tester test;
+    int a = 10;
+    int r = 0;
+    AsyncMethod async;
+    async.start_async(&Tester::rca1, &test, a, &r);
+    async.wait();
+    assert(r == a);
+}
+
+void test_async_vca2() {
+    Tester test;
+    int a = 10;
+    int b = 20;
+    AsyncMethod async;
+    async.start_async(&Tester::vca2, &test, a, b);
+    async.wait();
+    assert(test.value() == a + b);
+}
+
+void test_async_rca2() {
+    Tester test;
+    int a = 10;
+    int b = 20;
+    int r = 0;
+    AsyncMethod async;
+    async.start_async(&Tester::rca2, &test, a, b, &r);
+    async.wait();
+    assert(r == a + b);
+}
+
+void test_async_method() {
+    test_async_vc();
+    test_async_rc();
+    test_async_vca1();
+    test_async_rca1();
+    test_async_vca2();
+    test_async_rca2();
+}
+
+void test_async() {
+    test_async_func();
+    test_async_method();
+    fprintf(stderr, "Finish async test\n");
+}
+
 int main() {
     int a = 0;
     Mutex m;
@@ -148,6 +262,7 @@ int main() {
     for (int i = 0; i < 10; i ++) {
         thread[i].join();
     }
+    fprintf(stderr, "Finish thread test\n");
     assert(a == 10);
     test_async();
 }

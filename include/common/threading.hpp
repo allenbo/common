@@ -39,7 +39,7 @@ class Mutex : public Lock {
 
 class ScopeLock {
     public:
-        ScopeLock(Mutex* lock) {
+        ScopeLock(Lock* lock) {
             _lock = lock;
             _lock->lock();
         }
@@ -83,39 +83,50 @@ class Runable {
         virtual ~Runable(){}
 };
 
-
-
 class Thread: public Runable {
     public:
         Thread(const Runable& runable) {
+            _joinable = true;
             _active = false;
             _context = &runable;
-            _lock = new Mutex();
         }
         Thread() {
+            _joinable = true;
             _active = false;
             _context = NULL;
-            _lock = new Mutex();
         }
 
         virtual void run() {
-            printf("In thread\n");
         }
 
-        void start() {
+        bool start() {
             if (_active == true) {
-                return;
+                return false;
             }
-            _active = true;
             if (_context == NULL) {
                 _context = this;
             }
-            pthread_create(&_thread_id, NULL, &Thread::_run_thread, (void*)_context);
+
+            int r = pthread_create(&_thread_id, NULL, &Thread::_run_thread, (void*)_context);
+            if (r != 0) {
+                return false;
+            }
+            _active = true;
+            return true;
         }
 
-        void join() {
-            pthread_join(_thread_id, NULL);
+        long thread_id() const { return (long)_thread_id; }
+
+        bool join() {
+            if (_joinable == false) return false;
+
+            int r = pthread_join(_thread_id, NULL);
+
+            if (r != 0) {
+                return false;
+            }
             _active = false;
+            return true;
         }
 
         bool is_active() {
@@ -124,7 +135,6 @@ class Thread: public Runable {
 
         virtual ~Thread() {
             join();
-            delete _lock;
         }
 
     private:
@@ -139,7 +149,8 @@ class Thread: public Runable {
         const Runable * _context;
 
         bool _active;
-        Lock* _lock;
+        bool _startable;
+        bool _joinable;
 };
 
 class AsyncMethod {
@@ -147,6 +158,7 @@ class AsyncMethod {
         AsyncMethod(): _runable(NULL), _thread(NULL) {
         }
         void start_async(void (*fn) (void) ) {
+            _check();
             typedef void (*FUNC) (void);
             class VVRunable : public Runable {
                 public:
@@ -165,6 +177,7 @@ class AsyncMethod {
 
         template<class R>
         void start_async(R (*fn) (void), R* r) {
+            _check();
             typedef R (*FUNC) (void);
 
             class RVRunable : public Runable {
@@ -186,6 +199,7 @@ class AsyncMethod {
 
         template<class A1>
         void start_async(void (*fn) (A1) , A1 a1) {
+            _check();
             typedef void (*FUNC) (A1);
 
             class VA1Runable : public Runable {
@@ -204,8 +218,31 @@ class AsyncMethod {
             _thread = new Thread(*_runable);
             _thread->start();
         }
+
+        template<class C>
+        void start_async(void (C::*fn)(), C* c) {
+            _check();
+            typedef void (C::*FUNC)();
+            class VCVRunable : public Runable {
+                public:
+                    VCVRunable(FUNC fn, C* c) : _fn(fn), _c(c){
+                    }
+                    void run() {
+                        (_c->*_fn)();
+                    }
+                private:
+                    FUNC _fn;
+                    C* _c;
+            };
+
+            _runable = new  VCVRunable(fn, c);
+            _thread = new Thread(*_runable);
+            _thread->start();
+        }
+
         template<class A1, class R>
         void start_async(R (*fn) (A1), A1 a1, R*r) {
+            _check();
             typedef R (*FUNC) (A1);
 
             class RA1Runable : public Runable {
@@ -228,8 +265,35 @@ class AsyncMethod {
             _thread->start();
         }
 
+        template<class C, class R>
+        void start_async(R (C::*fn) (), C* c, R* r) {
+            _check();
+            typedef R (C::*FUNC) ();
+
+            class RCVRunable : public Runable {
+                public:
+                    RCVRunable(FUNC fn, C* c, R* r) : _fn(fn), _c(c), _r(r) {
+                    }
+
+                    void run() {
+                        *_r = (_c->*_fn)();
+                    }
+
+                private:
+                    FUNC _fn;
+                    C* _c;
+                    R* _r;
+            };
+
+            _runable = new RCVRunable(fn, c, r);
+            _thread = new Thread(*_runable);
+            _thread->start();
+        }
+
+
         template<class A1, class A2>
         void start_async(void (*fn) (A1, A2) , A1 a1, A2 a2) {
+            _check();
             typedef void (*FUNC) (A1, A2);
 
             class VA2Runable : public Runable {
@@ -249,8 +313,34 @@ class AsyncMethod {
             _thread = new Thread(*_runable);
             _thread->start();
         }
+
+        template<class C, class A1>
+        void start_async(void (C::*fn) (A1), C* c, A1 a1) {
+            _check();
+            typedef void (C::*FUNC) (A1);
+
+            class VCA1Runable : public Runable {
+                public:
+                    VCA1Runable(FUNC fn, C* c, A1 a1) : _fn(fn), _c(c), _a1(a1) {
+                    }
+                    void run() {
+                        (_c->*_fn)(_a1);
+                    }
+                private:
+                    FUNC _fn;
+                    C* _c;
+                    A1 _a1;
+            };
+
+            _runable = new  VCA1Runable(fn, c, a1);
+            _thread = new Thread(*_runable);
+            _thread->start();
+        }
+
+
         template<class A1, class A2, class R>
         void start_async(R (*fn) (A1, A2), A1 a1, A2 a2, R*r) {
+            _check();
             typedef R (*FUNC) (A1, A2);
 
             class RA2Runable : public Runable {
@@ -274,8 +364,36 @@ class AsyncMethod {
             _thread->start();
         }
 
+        template<class C, class A1, class R>
+        void start_async(R (C::*fn) (A1), C* c, A1 a1, R*r) {
+            _check();
+            typedef R (C::*FUNC) (A1);
+
+            class RCA1Runable : public Runable {
+                public:
+                    RCA1Runable(FUNC fn, C* c, A1 a1, R* r) : _fn(fn), _c(c), _a1(a1), _r(r) {
+                    }
+
+                    void run() {
+                        *_r = (_c->*_fn)(_a1);
+                    }
+
+                private:
+                    FUNC _fn;
+                    C* _c;
+                    A1 _a1;
+                    R* _r;
+            };
+
+            _runable = new RCA1Runable(fn, c, a1, r);
+            _thread = new Thread(*_runable);
+            _thread->start();
+        }
+
+
         template<class A1, class A2, class A3>
         void start_async(void (*fn) (A1, A2, A3) , A1 a1, A2 a2, A3 a3) {
+            _check();
             typedef void (*FUNC) (A1, A2, A3);
 
             class VA3Runable : public Runable {
@@ -296,8 +414,34 @@ class AsyncMethod {
             _thread = new Thread(*_runable);
             _thread->start();
         }
+
+        template<class C, class A1, class A2>
+        void start_async(void (C::*fn) (A1, A2) , C* c, A1 a1, A2 a2) {
+            _check();
+            typedef void (C::*FUNC) (A1, A2);
+
+            class VCA2Runable : public Runable {
+                public:
+                    VCA2Runable(FUNC fn, C* c, A1 a1, A2 a2) : _fn(fn), _c(c), _a1(a1), _a2(a2){
+                    }
+                    void run() {
+                        (_c->*_fn)(_a1, _a2);
+                    }
+                private:
+                    FUNC _fn;
+                    C* _c;
+                    A1 _a1;
+                    A2 _a2;
+            };
+
+            _runable = new  VCA2Runable(fn, c, a1, a2);
+            _thread = new Thread(*_runable);
+            _thread->start();
+        }
+
         template<class A1, class A2, class A3, class R>
         void start_async(R (*fn) (A1, A2, A3), A1 a1, A2 a2, A3 a3, R*r) {
+            _check();
             typedef R (*FUNC) (A1, A2, A3);
 
             class RA3Runable : public Runable {
@@ -322,6 +466,34 @@ class AsyncMethod {
             _thread->start();
         }
 
+        template<class C, class A1, class A2, class R>
+        void start_async(R (C::*fn) (A1, A2), C* c, A1 a1, A2 a2, R*r) {
+            _check();
+            typedef R (C::*FUNC) (A1, A2);
+
+            class RCA2Runable : public Runable {
+                public:
+                    RCA2Runable(FUNC fn, C* c, A1 a1, A2 a2, R* r) : _fn(fn), _c(c), _a1(a1), _a2(a2), _r(r) {
+                    }
+
+                    void run() {
+                        *_r = (_c->*_fn)(_a1, _a2);
+                    }
+
+                private:
+                    FUNC _fn;
+                    C* _c;
+                    A1 _a1;
+                    A2 _a2;
+                    R* _r;
+            };
+
+            _runable = new RCA2Runable(fn, c, a1, a2, r);
+            _thread = new Thread(*_runable);
+            _thread->start();
+        }
+
+
         void wait() {
           _thread->join();
         }
@@ -335,6 +507,15 @@ class AsyncMethod {
     private:
         Runable *_runable;
         Thread *_thread;
+
+
+        void _check(){
+          if (_runable != nullptr) {
+            _thread->join();
+            delete _runable;
+            delete _thread;
+          }
+        }
 };
 
 }
