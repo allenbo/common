@@ -25,7 +25,7 @@ typedef std::map<std::string, std::string> string_map;
         class& operator=(class& other); \
         class(const class& other);
 
-static size_t get_ncpu() {
+static inline size_t get_ncpu() {
 #ifdef WIN32
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);

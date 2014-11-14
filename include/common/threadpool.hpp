@@ -26,7 +26,7 @@ class ThreadPool {
     CLASS_NOCOPY(ThreadPool)
     public:
         ThreadPool(size_t pool_size = get_ncpu(), size_t queue_size = 2 * get_ncpu())
-            :_pool_size(pool_size), _task_queue(queue_size)
+            :_task_queue(queue_size), _pool_size(pool_size)
         {
             pthread_mutex_init(&_lock, NULL);
             _stop = false;

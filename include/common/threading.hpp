@@ -149,7 +149,6 @@ class Thread: public Runable {
         const Runable * _context;
 
         bool _active;
-        bool _startable;
         bool _joinable;
 };
 

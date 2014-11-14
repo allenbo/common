@@ -13,7 +13,7 @@ template<class T>
 class Queue {
     public:
         Queue(size_t size = 0)
-            :_size(size), _lock(), _empty_cond(&_lock), _full_cond(&_lock)
+            :_lock(), _empty_cond(&_lock), _full_cond(&_lock), _size(size)
         {
         }
         ~Queue() {
