@@ -134,7 +134,8 @@ class Thread: public Runable {
         }
 
         virtual ~Thread() {
-            join();
+            if (_active)
+                join();
         }
 
     private:

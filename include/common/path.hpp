@@ -1,10 +1,12 @@
 #ifndef __COMMON_PATH_HPP__
 #define __COMMON_PATH_HPP__
 
+#include "common/varstring.hpp"
 #include <stdlib.h>
 #include <string.h>
-
 #include <utility>
+#include <iostream>
+#include <fstream>
 
 namespace COMMON {
     
