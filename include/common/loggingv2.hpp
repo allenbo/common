@@ -8,41 +8,47 @@
 
 namespace COMMON {
 
-#define LOGGING_DEBUG 0
-#define LOGGING_INFO 1
-#define LOGGING_WARN 2
-#define LOGGING_ERROR 3
-#define LOGGING_FATAL 4
+#define LOGGINGV2_NONE 0
+#define LOGGINGV2_DEBUG 1
+#define LOGGINGV2_INFO 2
+#define LOGGINGV2_WARN 3
+#define LOGGINGV2_ERROR 4
+#define LOGGINGV2_FATAL 5
+
+#ifdef NONE
+#undef NONE
+#endif
+#define NONE LOGGINGV2_NONE
 
 #ifdef DEBUG
 #undef DEBUG
 #endif
-#define DEBUG LOGGING_DEBUG
+#define DEBUG LOGGINGV2_DEBUG
 
 #ifdef INFO
 #undef INFO
 #endif
-#define INFO LOGGING_INFO
+#define INFO LOGGINGV2_INFO
 
 #ifdef WARN
 #undef WARN
 #endif
-#define WARN LOGGING_WARN
+#define WARN LOGGINGV2_WARN
 
 #ifdef ERROR
 #undef ERROR
 #endif
-#define ERROR LOGGING_ERROR
+#define ERROR LOGGINGV2_ERROR
 
 #ifdef FATAL
 #undef FATAL
 #endif
-#define FATAL LOGGING_FATAL
+#define FATAL LOGGINGV2_FATAL
 
 #ifdef NDEBUG
-#define LIMIT LOGGING_INFO
+#define LIMIT LOGGINGV2_INFO
 #else
-#define LIMIT LOGGING_DEBUG
+#define LIMIT LOGGINGV2_DEBUG
 #endif
 
 #define LOG(severity) COMPACT_LOG_MESSAGE(severity)
@@ -53,6 +59,19 @@ namespace COMMON {
 #define LOG_MESSAGE_2(file, lineno) LogMessage::New(2, file, lineno)
 #define LOG_MESSAGE_3(file, lineno) LogMessage::New(3, file, lineno)
 #define LOG_MESSAGE_4(file, lineno) LogMessage::New(4, file, lineno)
+#define LOG_MESSAGE_5(file, lineno) LogMessage::New(5, file, lineno)
+
+#define CHECK_OP(op, x, y)  ((x) op (y))? LOG(NONE) : LOG(FATAL)
+
+#define CHECK_EQ(x, y) CHECK_OP(==, x, y)
+#define CHECK_NE(x, y) CHECK_OP(!=, x, y)
+#define CHECK_GT(x, y) CHECK_OP(>, x, y)
+#define CHECK_GE(x, y) CHECK_OP(>=, x, y)
+#define CHECK_LT(x, y) CHECK_OP(<, x, y)
+#define CHECK_LE(x, y) CHECK_OP(<=, x, y)
+
+#define CHECK_NULL(x) CHECK_OP(==, x, nullptr)
+#define CHECK_NOTNULL(x) CHECK_OP(!=, x, nullptr)
 
 class LogMessage {
     public:
@@ -61,7 +80,8 @@ class LogMessage {
             _filename = filename;
             _lineno = lineno;
             _stream = std::shared_ptr<std::ostringstream>(new std::ostringstream());
-            (*this) << "[" << baseFilename(filename) << "|" << lineno << "] ";
+            if (_severity != LOGGINGV2_NONE)
+                (*this) << "[" << baseFilename(filename) << "|" << lineno << "] ";
         }
 
         LogMessage(const LogMessage& other) {
@@ -76,7 +96,8 @@ class LogMessage {
               std::cerr << _stream->str();
             }
             if (_severity == FATAL) {
-              abort();
+              std::cerr << "Abort" << std::endl;
+              exit(-1);
             }
         }
 
