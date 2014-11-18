@@ -61,7 +61,7 @@ namespace COMMON {
 #define LOG_MESSAGE_4(file, lineno) LogMessage::New(4, file, lineno)
 #define LOG_MESSAGE_5(file, lineno) LogMessage::New(5, file, lineno)
 
-#define CHECK_OP(op, x, y)  ((x) op (y))? LOG(NONE) : LOG(FATAL)
+#define CHECK_OP(op, x, y)  (((x) op (y))? LOG(NONE) : LOG(FATAL))
 
 #define CHECK_EQ(x, y) CHECK_OP(==, x, y)
 #define CHECK_NE(x, y) CHECK_OP(!=, x, y)
@@ -73,6 +73,32 @@ namespace COMMON {
 #define CHECK_NULL(x) CHECK_OP(==, x, nullptr)
 #define CHECK_NOTNULL(x) CHECK_OP(!=, x, nullptr)
 
+#define LOG_IF(severity, expr) ((expr) ? LOG(severity) : LOG(NONE))
+
+#define LOG_EVERY_N(severity, n) LOG_EVERY_N2(severity, n, __LINE__)
+#define LOG_EVERY_N2(severity, n, line) \
+    static int LOG_OCCURRENCE ## line= 0;\
+    static int LOG_MODULE ## line = (n); \
+    LOG_OCCURRENCE ## line  ++; if (LOG_OCCURRENCE ## line == LOG_MODULE ## line) LOG_OCCURRENCE ## line -= LOG_MODULE ## line; \
+    LOG_IF(severity, LOG_OCCURRENCE ## line == 1)
+
+#define LOG_FIRST_N(severity, n) LOG_FIRST_N2(severity, n, __LINE__) 
+#define LOG_FIRST_N2(severity, n, line) \
+    static int LOG_OCCURRENCE ## line = 0;  \
+    static int LOG_MAX ## line = (n);\
+    LOG_OCCURRENCE ## line ++; \
+    LOG_IF(severity, LOG_OCCURRENCE ## line <= LOG_MAX ## line)
+
+static const char* log_literal[] = {
+    "None",
+    "Debug",
+    "Info",
+    "Warn",
+    "Error",
+    "Fatal",
+    nullptr
+};
+
 class LogMessage {
     public:
         LogMessage(int severity, const char* filename, const int lineno) {
@@ -81,7 +107,7 @@ class LogMessage {
             _lineno = lineno;
             _stream = std::shared_ptr<std::ostringstream>(new std::ostringstream());
             if (_severity != LOGGINGV2_NONE)
-                (*this) << "[" << baseFilename(filename) << "|" << lineno << "] ";
+                (*this) << log_literal[_severity] << " [" << baseFilename(filename) << "|" << lineno << "] ";
         }
 
         LogMessage(const LogMessage& other) {
@@ -101,8 +127,12 @@ class LogMessage {
             }
         }
 
-        static LogMessage New(int severity, const char* filename, const int lineno) {
-            return LogMessage(severity, filename, lineno);
+        static LogMessage New(int severity, const char* filename, const int lineno, bool cond = true) {
+            if (cond) {
+              return LogMessage(severity, filename, lineno);
+            } else {
+              return LogMessage(LOGGINGV2_NONE, filename, lineno);
+            }
         }
 
         template<class T>
