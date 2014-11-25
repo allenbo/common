@@ -2,6 +2,7 @@
 #define __COMMON_ALL_HPP__
 
 #include "common/logging.hpp"
+#include "common/loggingv2.hpp"
 #include "common/varstring.hpp"
 #include "common/threadpool.hpp"
 #include "common/threading.hpp"
