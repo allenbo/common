@@ -5,6 +5,7 @@
 #include <sstream>
 #include <memory>
 #include <cstdlib>
+#include <string.h>
 
 namespace COMMON {
 
