@@ -74,4 +74,6 @@ int main() {
         assert(vs.toString() == str3);
     }
 
+    std::cout << VarString::format("This is an integer %d", 2) << std::endl;
+
 }

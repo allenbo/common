@@ -7,6 +7,7 @@
 #include <cctype>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #define BUFSIZE 1024
 #define MALLOC(type, ptr, size) do {\
@@ -98,6 +99,15 @@ class VarString {
                 }
             }
             return rst;
+        }
+
+        static std::string format(const char* fmt, ...) {
+            va_list va;
+            va_start(va, fmt);
+            char fullstring[1024];
+            vsnprintf(fullstring, 1023, fmt, va);
+            va_end(va);
+            return std::string(fullstring);
         }
 
         static bool starts_with(const std::string str, const std::string prefix) {

@@ -1,5 +1,5 @@
-#ifndef __COMMON_LOGGING_HPP__
-#define __COMMON_LOGGING_HPP__
+#ifndef __COMMON_LOGGINGV2_HPP__
+#define __COMMON_LOGGINGV2_HPP__
 
 #include <iostream>
 #include <sstream>
