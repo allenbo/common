@@ -37,7 +37,7 @@ class ThreadPool {
             _active_count = 0;
 
             pthread_mutex_lock(&_lock);
-            int i;
+            size_t i;
             for(i = 0; i < _pool_size; i ++ ) {
                 int ret = pthread_create(&_pool[i], NULL, _run_thread, (void*)this);
                 if (ret != 0) {
@@ -57,7 +57,7 @@ class ThreadPool {
             } else {
                 _shutdown = shutdown;
             }
-            for(int i = 0; i < _active_count; i ++ ) {
+            for(size_t i = 0; i < _active_count; i ++ ) {
                 pthread_join(_pool[i], NULL);
             }
             _task_queue.clear();

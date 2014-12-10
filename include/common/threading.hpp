@@ -37,6 +37,31 @@ class Mutex : public Lock {
         friend class Condition;
 };
 
+class RecursiveMutex : public Lock {
+    CLASS_NOCOPY(RecursiveMutex)
+    public:
+        RecursiveMutex() {
+            pthread_mutexattr_init(&_attr);
+            pthread_mutexattr_settype(&_attr, PTHREAD_MUTEX_RECURSIVE);
+
+            pthread_mutex_init(&_lock, &_attr);
+        }
+        ~RecursiveMutex() {
+            pthread_mutexattr_destroy(&_attr);
+            pthread_mutex_destroy(&_lock);
+        }
+        void lock() {
+            pthread_mutex_lock(&_lock);
+        }
+        void unlock() {
+            pthread_mutex_unlock(&_lock);
+        }
+    private:
+        pthread_mutex_t _lock;
+        pthread_mutexattr_t _attr;
+        friend class Condition;
+};
+
 class ScopeLock {
     public:
         ScopeLock(Lock* lock) {

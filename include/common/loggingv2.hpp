@@ -70,6 +70,7 @@ namespace COMMON {
 #define CHECK_GE(x, y) CHECK_OP(>=, x, y)
 #define CHECK_LT(x, y) CHECK_OP(<, x, y)
 #define CHECK_LE(x, y) CHECK_OP(<=, x, y)
+#define CHECK(x) CHECK_EQ(x, true)
 
 #define CHECK_NULL(x) CHECK_OP(==, x, nullptr)
 #define CHECK_NOTNULL(x) CHECK_OP(!=, x, nullptr)
