@@ -1,5 +1,5 @@
-#ifndef __COMMON_VARSTRING_HPP__
-#define __COMMON_VARSTRING_HPP__
+#ifndef __common_VARSTRING_HPP__
+#define __common_VARSTRING_HPP__
 #include <string>
 #include <map>
 #include <set>
@@ -26,7 +26,7 @@
 
 
 
-namespace COMMON {
+namespace common {
 
 class VarString {
     public:

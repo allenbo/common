@@ -1,5 +1,5 @@
-#ifndef __COMMON_LOGGINGV2_HPP__
-#define __COMMON_LOGGINGV2_HPP__
+#ifndef __common_LOGGINGV2_HPP__
+#define __common_LOGGINGV2_HPP__
 
 #include <iostream>
 #include <sstream>
@@ -7,14 +7,13 @@
 #include <cstdlib>
 #include <string.h>
 
-namespace COMMON {
+namespace common {
 
 #define LOGGINGV2_NONE 0
 #define LOGGINGV2_DEBUG 1
 #define LOGGINGV2_INFO 2
 #define LOGGINGV2_WARN 3
-#define LOGGINGV2_ERROR 4
-#define LOGGINGV2_FATAL 5
+#define LOGGINGV2_FATAL 4
 
 #ifdef NONE
 #undef NONE
@@ -36,11 +35,6 @@ namespace COMMON {
 #endif
 #define WARN LOGGINGV2_WARN
 
-#ifdef ERROR
-#undef ERROR
-#endif
-#define ERROR LOGGINGV2_ERROR
-
 #ifdef FATAL
 #undef FATAL
 #endif
@@ -55,12 +49,11 @@ namespace COMMON {
 #define LOG(severity) COMPACT_LOG_MESSAGE(severity)
 #define COMPACT_LOG_MESSAGE(s) LOG_MESSAGE_ ## s(__FILE__, __LINE__)
 
-#define LOG_MESSAGE_0(file, lineno) LogMessage::New(0, file, lineno)
-#define LOG_MESSAGE_1(file, lineno) LogMessage::New(1, file, lineno)
-#define LOG_MESSAGE_2(file, lineno) LogMessage::New(2, file, lineno)
-#define LOG_MESSAGE_3(file, lineno) LogMessage::New(3, file, lineno)
-#define LOG_MESSAGE_4(file, lineno) LogMessage::New(4, file, lineno)
-#define LOG_MESSAGE_5(file, lineno) LogMessage::New(5, file, lineno)
+#define LOG_MESSAGE_0(file, lineno) common::LogMessage::New(0, file, lineno)
+#define LOG_MESSAGE_1(file, lineno) common::LogMessage::New(1, file, lineno)
+#define LOG_MESSAGE_2(file, lineno) common::LogMessage::New(2, file, lineno)
+#define LOG_MESSAGE_3(file, lineno) common::LogMessage::New(3, file, lineno)
+#define LOG_MESSAGE_4(file, lineno) common::LogMessage::New(4, file, lineno)
 
 #define CHECK_OP(op, x, y)  (((x) op (y))? LOG(NONE) : LOG(FATAL))
 

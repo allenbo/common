@@ -9,7 +9,7 @@
 #include <sstream>
 #include <vector>
 
-namespace COMMON {
+namespace common {
 
 class Property {
     public:

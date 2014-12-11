@@ -1,5 +1,5 @@
-#ifndef __COMMON_QUEUE_HPP__
-#define __COMMON_QUEUE_HPP__
+#ifndef __common_QUEUE_HPP__
+#define __common_QUEUE_HPP__
 
 #include "common/misc.hpp"
 #include "common/threading.hpp"
@@ -7,7 +7,7 @@
 #include <deque>
 #include <stdio.h>
 
-namespace COMMON {
+namespace common {
 
 template<class T>
 class Queue {

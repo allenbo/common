@@ -1,12 +1,12 @@
-#ifndef __COMMON_THREADING_HPP__
-#define __COMMON_THREADING_HPP__
+#ifndef __common_THREADING_HPP__
+#define __common_THREADING_HPP__
 
 #include <pthread.h>
 #include <stdio.h>
 #include <time.h>
 #include "common/misc.hpp"
 
-namespace COMMON {
+namespace common {
 
 class Lock {
     CLASS_NOCOPY(Lock)

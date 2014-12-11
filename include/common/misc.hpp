@@ -1,5 +1,5 @@
-#ifndef __COMMON_MISC_HPP__
-#define __COMMON_MISC_HPP__
+#ifndef __common_MISC_HPP__
+#define __common_MISC_HPP__
 
 #ifdef _WIN32
 #include <windows.h>
@@ -16,7 +16,7 @@
 
 #include <map>
 
-namespace COMMON {
+namespace common {
 
 typedef std::map<std::string, std::string> string_map;
 

@@ -1,5 +1,5 @@
-#ifndef __COMMON_THREADPOOL_HPP__
-#define __COMMON_THREADPOOL_HPP__
+#ifndef __common_THREADPOOL_HPP__
+#define __common_THREADPOOL_HPP__
 
 #include "common/misc.hpp"
 #include "common/queue.hpp"
@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <functional>
 
-namespace COMMON {
+namespace common {
 
 typedef void (*func) (void*);
 

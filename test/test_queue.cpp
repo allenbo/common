@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-using namespace COMMON;
+using namespace common;
 
 void* put(void* args) {
     Queue<int>* q = (Queue<int>*)args;

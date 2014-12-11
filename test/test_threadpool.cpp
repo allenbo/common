@@ -1,7 +1,7 @@
 #include "common/all.hpp"
 #include <stdio.h>
 #include <sys/time.h>
-using namespace COMMON;
+using namespace common;
 
 void microsleep(int us) {
     struct timespec ts;

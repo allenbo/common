@@ -1,11 +1,11 @@
-#ifndef __COMMON_TIMER_HPP__
-#define __COMMON_TIMER_HPP__
+#ifndef __common_TIMER_HPP__
+#define __common_TIMER_HPP__
 
 #include <string.h>
 
 #include "common/misc.hpp"
 
-namespace COMMON {
+namespace common {
 
 
 class Timer {

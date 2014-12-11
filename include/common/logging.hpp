@@ -1,5 +1,5 @@
-#ifndef __COMMON_LOGGING_HPP__
-#define __COMMON_LOGGING_HPP__
+#ifndef __common_LOGGING_HPP__
+#define __common_LOGGING_HPP__
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -7,11 +7,11 @@
 #include <stdlib.h>
 #include <string>
 
-namespace COMMON {
+namespace common {
 
 #define CLASS_MAKE_LOGGER \
     private:\
-            COMMON::Logger _logger;
+            common::Logger _logger;
 #define CLASS_INIT_LOGGER(classname, level)\
     _logger.setClassName(classname);\
     _logger.setLevel(level);
@@ -22,7 +22,7 @@ namespace COMMON {
 #define CLOG_FATAL(...) _logger.fatal(  __func__,__FILE__, __LINE__, __VA_ARGS__)
 
 
-#define FUNC_MAKE_LOGGER COMMON::Logger __func_logger__;
+#define FUNC_MAKE_LOGGER common::Logger __func_logger__;
 #define FUNC_LOGGER_SET_LEVEL(level) __func_logger__.setLevel(level);
 #define FLOG_DEBUG(...) __func_logger__.debug( __func__, __FILE__, __LINE__, __VA_ARGS__)
 #define FLOG_INFO(...) __func_logger__.info( __func__, __FILE__, __LINE__, __VA_ARGS__)

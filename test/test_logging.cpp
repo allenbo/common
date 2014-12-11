@@ -1,5 +1,5 @@
 #include "common/logging.hpp"
-using namespace COMMON;
+using namespace common;
 
 class LoggingTest {
     CLASS_MAKE_LOGGER

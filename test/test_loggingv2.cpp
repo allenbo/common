@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 
-using namespace COMMON;
+using namespace common;
 
 namespace std {
 std::ostream& operator<<(std::ostream& out, const std::vector<int>& vec){

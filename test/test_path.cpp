@@ -1,7 +1,7 @@
 #include "common/all.hpp"
 #include <iostream>
 #include <assert.h>
-using namespace COMMON;
+using namespace common;
 
 int main() {
     std::string path = "test/test.cpp";

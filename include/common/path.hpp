@@ -1,5 +1,5 @@
-#ifndef __COMMON_PATH_HPP__
-#define __COMMON_PATH_HPP__
+#ifndef __common_PATH_HPP__
+#define __common_PATH_HPP__
 
 #include "common/varstring.hpp"
 #include <stdlib.h>
@@ -8,7 +8,7 @@
 #include <iostream>
 #include <fstream>
 
-namespace COMMON {
+namespace common {
     
 class Path {
     public:

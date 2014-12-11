@@ -12,4 +12,6 @@
 #include "common/path.hpp"
 #include "common/misc.hpp"
 
+namespace COMMON = common;
+
 #endif

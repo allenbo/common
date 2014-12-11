@@ -1,7 +1,7 @@
 #include "common/all.hpp"
 #include <stdio.h>
 
-using namespace COMMON;
+using namespace common;
 
 class MyThread: public Thread {
     public:

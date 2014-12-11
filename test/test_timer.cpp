@@ -1,7 +1,7 @@
 #include "common/all.hpp"
 #include <stdio.h>
 
-using namespace COMMON;
+using namespace common;
 
 int main() {
     Timer t1;

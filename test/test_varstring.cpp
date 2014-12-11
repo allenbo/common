@@ -7,7 +7,7 @@
 
 static const char* alphabeta_number = "abcdefghijklmnopqrstuvwxyzABCDEFGHILKLMNOPQRSTUVWXYZ0123456789";
 
-using namespace COMMON;
+using namespace common;
 
 std::string random_string(int size) {
     char* tmp = new char[size];
